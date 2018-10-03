@@ -18,10 +18,12 @@ lazy val commonSettings = Seq(
     circe.circeCore,
     circe.circeGeneric,
     circe.circeParser,
-    sisioh.baseunitsScala
+    sisioh.baseunitsScala,
+    akka.akkaStream
   ),
   scalafmtOnCompile in ThisBuild := true,
-  scalafmtTestOnCompile in ThisBuild := true
+  scalafmtTestOnCompile in ThisBuild := true,
+  parallelExecution in Test := false
 )
 
 lazy val infrastructure = (project in file("infrastructure"))
@@ -69,6 +71,13 @@ lazy val flyway = (project in file("tools/flyway"))
     flywayMigrate := (flywayMigrate dependsOn wixMySQLStart).value
   )
   .enablePlugins(FlywayPlugin)
+
+lazy val `use-case` = (project in file("use-case"))
+  .settings(commonSettings).settings(
+  name := "$name$-use-case",
+  libraryDependencies ++= Seq(
+  )
+).dependsOn(domain)
 
 lazy val interface = (project in file("interface"))
   .settings(commonSettings)
@@ -125,17 +134,15 @@ lazy val interface = (project in file("interface"))
       github.swaggerAkkaHttp,
       megard.akkaHttpCors,
       akka.akkaHttp,
-      akka.akkaStream,
       heikoseeberger.akkaHttpCirce,
       mysql.mysqlConnectorJava,
       slick.slick,
       slick.slickHikaricp,
       monix.monix,
       sisioh.baseunitsScala
-    ),
-    parallelExecution in Test := false
+    )
   )
-  .dependsOn(domain, flyway)
+  .dependsOn(`use-case`, flyway)
   .disablePlugins(WixMySQLPlugin)
 
 lazy val localMySQL = (project in file("tools/local-mysql"))
