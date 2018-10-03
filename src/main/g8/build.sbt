@@ -148,7 +148,7 @@ lazy val interface = (project in file("interface"))
 lazy val localMySQL = (project in file("tools/local-mysql"))
   .settings(commonSettings)
   .settings(
-    name := "spetstore-local-mysql",
+    name := "$name$-local-mysql",
     libraryDependencies ++= Seq(
       mysql.mysqlConnectorJava
     ),
