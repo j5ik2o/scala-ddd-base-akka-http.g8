@@ -12,9 +12,9 @@ import wvlet.airframe._
 
 package object interface {
 
-  def createInterfaceDesign(host: String, port: Int, salt: String, apiClasses: Set[Class[_]]): Design =
+  def createInterfaceDesign(host: String, port: Int, hashidsSalt: String, apiClasses: Set[Class[_]]): Design =
     newDesign
-      .bind[Hashids].toInstance(new Hashids(salt))
+      .bind[Hashids].toInstance(new Hashids(hashidsSalt))
       .bind[Routes].toSingleton
       .bind[SwaggerDocService].toInstance(new SwaggerDocService(host, port, apiClasses))
       .bind[ApiServer].toSingleton

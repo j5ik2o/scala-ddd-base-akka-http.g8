@@ -29,7 +29,6 @@ object Boot {
           .add(interface.createInterfaceDesign(config.host, config.port, salt, Set(classOf[UserAccountController])))
 
         design.withSession { session =>
-          val system = session.build[ActorSystem]
           session.build[ApiServer].start(config.host, config.port, settings = ServerSettings(system))
         }
       case None =>
