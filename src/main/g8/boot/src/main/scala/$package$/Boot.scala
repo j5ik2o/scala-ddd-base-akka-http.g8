@@ -2,8 +2,8 @@ package $package$
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.settings.ServerSettings
-import org.hashids.Hashids
 import $package$.interface.api.ApiServer
+import $package$.interface.api.controller.UserAccountController
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import wvlet.airframe._
@@ -18,14 +18,15 @@ object Boot {
     val system = ActorSystem("$package$")
     val dbConfig: DatabaseConfig[JdbcProfile] =
       DatabaseConfig.forConfig[JdbcProfile](path = "$package$.interface.storage.jdbc", system.settings.config)
+    val salt = system.settings.config.getString("$package$.interface.hashids.salt")
 
     parser.parse(args, AppConfig()) match {
       case Some(config) =>
         val design = newDesign
-          .bind[Hashids].toInstance(new Hashids(system.settings.config.getString("$package$.interface.hashids.salt")))
           .bind[ActorSystem].toInstance(system)
           .bind[JdbcProfile].toInstance(dbConfig.profile)
           .bind[JdbcProfile#Backend#Database].toInstance(dbConfig.db)
+          .add(interface.createInterfaceDesign(config.host, config.port, salt, Set(classOf[UserAccountController])))
 
         design.withSession { session =>
           val system = session.build[ActorSystem]

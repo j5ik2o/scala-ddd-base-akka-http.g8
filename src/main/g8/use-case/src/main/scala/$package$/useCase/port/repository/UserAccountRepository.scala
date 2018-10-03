@@ -1,9 +1,7 @@
-package $package$.interface.repository
+package $package$.useCase.port.repository
 
 import $package$.domain.model.{ UserAccount, UserAccountId }
-import _root_.slick.jdbc.JdbcProfile
 import com.github.j5ik2o.dddbase._
-import monix.eval.Task
 
 trait UserAccountRepository[M[_]]
     extends AggregateSingleReader[M]
@@ -16,11 +14,4 @@ trait UserAccountRepository[M[_]]
   override type AggregateType = UserAccount
 }
 
-object UserAccountRepository {
 
-  type BySlick[A] = Task[A]
-
-  def bySlick(profile: JdbcProfile, db: JdbcProfile#Backend#Database): UserAccountRepository[BySlick] =
-    new UserAccountRepositoryOnJDBC(profile, db)
-
-}

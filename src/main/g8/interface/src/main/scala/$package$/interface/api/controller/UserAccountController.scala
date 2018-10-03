@@ -15,7 +15,7 @@ import org.sisioh.baseunits.scala.timeutil.Clock
 import $package$.domain.model._
 import $package$.interface.api.model.{CreateUserAccountRequestJson, CreateUserAccountResponseBody, CreateUserAccountResponseJson}
 import $package$.interface.generator.IdGenerator
-import $package$.interface.repository.UserAccountRepository
+import $package$.useCase.port.repository.UserAccountRepository
 import wvlet.airframe._
 
 import scala.concurrent.Future

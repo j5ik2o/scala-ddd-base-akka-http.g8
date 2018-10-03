@@ -6,11 +6,11 @@ import monix.eval.Task
 import org.sisioh.baseunits.scala.time.TimePoint
 import $package$.domain.model._
 import $package$.interface.dao.UserAccountComponent
-import $package$.interface.repository.UserAccountRepository.BySlick
+import $package$.useCase.port.repository.UserAccountRepository
 import slick.jdbc.JdbcProfile
 
 class UserAccountRepositoryOnJDBC(val profile: JdbcProfile, val db: JdbcProfile#Backend#Database)
-  extends UserAccountRepository[BySlick]
+  extends UserAccountRepository[Task]
     with AggregateSingleReadFeature
     with AggregateMultiReadFeature
     with AggregateSingleWriteFeature
