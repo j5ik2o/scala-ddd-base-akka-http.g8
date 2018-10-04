@@ -12,3 +12,4 @@ $ sbt new j5ik2o/scala-ddd-base-akka-http.g8
 - akka-http
 - akka-stream
 - swagger-akka-http
+- airframe
