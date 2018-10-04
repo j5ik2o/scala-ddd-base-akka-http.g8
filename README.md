@@ -1,5 +1,9 @@
 # A Giter8 template for DDD and akka-http
 
+## status
+
+WIP
+
 ## usage
 
 ```sh
