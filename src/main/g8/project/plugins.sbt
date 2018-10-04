@@ -11,3 +11,5 @@ addSbtPlugin("com.chatwork" % "sbt-wix-embedded-mysql" % "1.0.9")
 addSbtPlugin("jp.co.septeni-original" % "sbt-dao-generator" % "1.0.8")
 
 addSbtPlugin("io.github.davidmweber" % "flyway-sbt" % "5.0.0")
+
+addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")

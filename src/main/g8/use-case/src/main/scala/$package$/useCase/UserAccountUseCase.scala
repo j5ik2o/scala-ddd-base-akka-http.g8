@@ -1,7 +1,7 @@
 package $package$.useCase
 
 import akka.NotUsed
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl._
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.sisioh.baseunits.scala.timeutil.Clock
@@ -32,7 +32,7 @@ trait UserAccountUseCase {
             None
           )
         )
-      } yield CreateUserAccountResponse(result)).runAsync
+      } yield CreateUserAccountResponse(id.value)).runAsync
     }
 
   def resolveById(id: UserAccountId)(implicit scheduler: Scheduler): Source[UserAccount, NotUsed] =
