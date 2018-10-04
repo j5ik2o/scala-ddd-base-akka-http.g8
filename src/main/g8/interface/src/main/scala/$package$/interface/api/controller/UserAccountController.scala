@@ -1,6 +1,7 @@
 package $package$.interface.api.controller
 
-import akka.http.scaladsl.server.{Directives, Route}
+import akka.http.scaladsl.server.{Directive1, Directives, Route}
+import akka.stream.scaladsl.{Sink, Source}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import io.swagger.v3.oas.annotations.Operation
@@ -8,14 +9,11 @@ import io.swagger.v3.oas.annotations.media.{Content, Schema}
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import javax.ws.rs._
-import monix.eval.Task
 import monix.execution.Scheduler
 import org.hashids.Hashids
-import org.sisioh.baseunits.scala.timeutil.Clock
-import $package$.domain.model._
 import $package$.interface.api.model.{CreateUserAccountRequestJson, CreateUserAccountResponseBody, CreateUserAccountResponseJson}
-import $package$.interface.generator.IdGenerator
-import $package$.useCase.port.repository.UserAccountRepository
+import $package$.useCase.UserAccountUseCase
+import $package$.useCase.model.CreateUserAccountRequest
 import wvlet.airframe._
 
 import scala.concurrent.Future
@@ -25,47 +23,47 @@ import scala.concurrent.Future
 @Produces(Array("application/json"))
 trait UserAccountController extends Directives {
 
-  private val userIdGenerator = bind[IdGenerator[UserAccountId]]
-  private val userRepository = bind[UserAccountRepository[Task]]
+  private val userAccountUseCase = bind[UserAccountUseCase]
 
   private val hashids = bind[Hashids]
 
-  private def convertToAggregate(id: UserAccountId, request: CreateUserAccountRequestJson): UserAccount = UserAccount(
-    id = id,
-    status = Status.Active,
-    emailAddress = EmailAddress(request.emailAddress),
-    password = HashedPassword(request.password),
-    firstName = request.firstName,
-    lastName = request.lastName ,
-    createdAt = Clock.now,
-    updatedAt = None
-  )
+  def route: Route = create
+
+  private def extractScheduler: Directive1[Scheduler] = extractActorSystem.tmap { s =>
+    Scheduler(s._1.dispatcher)
+  }
 
   @POST
   @Operation(
     summary = "Create UserAccount",
     description = "Create UserAccount",
-    requestBody =
-      new RequestBody(content = Array(new Content(schema = new Schema(implementation = classOf[CreateUserAccountRequestJson])))),
+    requestBody = new RequestBody(
+      content = Array(new Content(schema = new Schema(implementation = classOf[CreateUserAccountRequestJson])))
+    ),
     responses = Array(
-      new ApiResponse(responseCode = "200",
+      new ApiResponse(
+        responseCode = "200",
         description = "Create response",
-        content = Array(new Content(schema = new Schema(implementation = classOf[CreateUserAccountResponseJson])))),
+        content = Array(new Content(schema = new Schema(implementation = classOf[CreateUserAccountResponseJson])))
+      ),
       new ApiResponse(responseCode = "400", description = "Bad request"),
       new ApiResponse(responseCode = "500", description = "Internal server error")
     )
   )
   def create: Route = path("user_accounts") {
     post {
-      extractActorSystem { implicit system =>
-        implicit val scheduler: Scheduler = Scheduler(system.dispatcher)
-        entity(as[CreateUserAccountRequestJson]) { request =>
-          val future: Future[CreateUserAccountResponseJson] = (for {
-            userAccountId <- userIdGenerator.generateId()
-            _      <- userRepository.store(convertToAggregate(userAccountId, request))
-          } yield CreateUserAccountResponseJson(Right(CreateUserAccountResponseBody(hashids.encode(userAccountId.value))))).runAsync
-          onSuccess(future) { result =>
-            complete(result)
+      extractMaterializer { implicit mat =>
+        extractScheduler { implicit scheduler =>
+          entity(as[CreateUserAccountRequestJson]) { request =>
+            val future: Future[CreateUserAccountResponseJson] = Source
+              .single(request).map { request =>
+              CreateUserAccountRequest(request.emailAddress, request.password, request.firstName, request.lastName)
+            }.via(userAccountUseCase.store).map { response =>
+              CreateUserAccountResponseJson(Right(CreateUserAccountResponseBody(hashids.encode(response.id))))
+            }.runWith(Sink.head)
+            onSuccess(future) { result =>
+              complete(result)
+            }
           }
         }
       }
@@ -73,3 +71,4 @@ trait UserAccountController extends Directives {
   }
 
 }
+

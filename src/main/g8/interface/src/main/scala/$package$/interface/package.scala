@@ -4,9 +4,10 @@ import monix.eval.Task
 import org.hashids.Hashids
 import $package$.domain.model.UserAccountId
 import $package$.interface.api.controller.UserAccountController
-import $package$.interface.api.{ApiServer, Routes, SwaggerDocService}
-import $package$.interface.generator.{IdGenerator, UserAccountIdGeneratorOnJDBC}
+import $package$.interface.api.{ ApiServer, Routes, SwaggerDocService }
+import $package$.interface.generator.UserAccountIdGeneratorOnJDBC
 import $package$.interface.repository.UserAccountRepositoryOnJDBC
+import $package$.useCase.port.generator.IdGenerator
 import $package$.useCase.port.repository.UserAccountRepository
 import wvlet.airframe._
 
@@ -21,5 +22,6 @@ package object interface {
       .bind[UserAccountRepository[Task]].to[UserAccountRepositoryOnJDBC]
       .bind[IdGenerator[UserAccountId]].to[UserAccountIdGeneratorOnJDBC]
       .bind[UserAccountController].toSingleton
+      .add(useCase.createUseCaseDesign)
 
 }

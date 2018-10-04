@@ -1,6 +1,7 @@
 package $package$.interface.generator
 
 import monix.eval.Task
+import $package$.useCase.port.generator.IdGenerator
 import slick.jdbc.JdbcProfile
 
 abstract class AbstractIdGeneratorOnJDBC[ID](val profile: JdbcProfile,

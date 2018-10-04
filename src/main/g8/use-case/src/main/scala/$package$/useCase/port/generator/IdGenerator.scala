@@ -1,4 +1,4 @@
-package $package$.interface.generator
+package $package$.useCase.port.generator
 
 import monix.eval.Task
 

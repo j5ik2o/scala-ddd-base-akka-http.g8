@@ -19,7 +19,8 @@ lazy val commonSettings = Seq(
     circe.circeGeneric,
     circe.circeParser,
     sisioh.baseunitsScala,
-    akka.akkaStream
+    akka.akkaStream,
+    monix.monix
   ),
   scalafmtOnCompile in ThisBuild := true,
   scalafmtTestOnCompile in ThisBuild := true,
@@ -138,7 +139,6 @@ lazy val interface = (project in file("interface"))
       mysql.mysqlConnectorJava,
       slick.slick,
       slick.slickHikaricp,
-      monix.monix,
       sisioh.baseunitsScala
     )
   )
